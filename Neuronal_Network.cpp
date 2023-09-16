@@ -110,10 +110,6 @@ void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<
         // Print error for this epoch
         error /= numInputs;
         std::cout << "Epoch " << epoch << ", Total error: " << error << std::endl;
-
-        // Save after each epoch
-        std::string filename = "checkpoint_epoch_" + std::to_string(epoch) + ".nn";
-        save(filename);
     }
 }
 

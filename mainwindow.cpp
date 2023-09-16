@@ -92,11 +92,24 @@ void MainWindow::test_suite(NeuralNetwork& nn, std::vector<std::vector<double>>&
     results = count;
 }
 
-
-
 void MainWindow::trainModel() {
-    // TODO: Train the neural network model
+    // Parameters for training
+    int epochs = 5;  // Number of times to iterate over the entire dataset
+    int batchSize = 32;  // Number of data points per batch
+    std::vector<double> errors;  // To collect errors for each batch
+
+    // Train the neural network
+    neuralNetwork->train(trainingData, trainingLabels, epochs, errors, batchSize);
+
+    // Update the UI to show training is complete or display the training error
+    if (errors.empty()) {
+        ui->statusLabel->setText("Training complete!");
+    } else {
+        // Display the last error as an example
+        ui->statusLabel->setText(QString("Training complete. Last error: %1").arg(errors.back()));
+    }
 }
+
 
 void MainWindow::testModel() {
     int correctPredictions = 0;
