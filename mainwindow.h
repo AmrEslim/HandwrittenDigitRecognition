@@ -16,6 +16,7 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
     void loadEMNISTData(const std::string& filename, std::vector<std::vector<double>>& data, std::vector<int>& labels);
+    void loadData();
     std::string labelToChar(int label);
 
 private:

@@ -6,6 +6,8 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
+#include <QTimer>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,18 +18,29 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->testButton, &QPushButton::clicked, this, &MainWindow::testModel);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveModel);
     connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadModel);
-    try {
-        loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-train.csv", trainingData, trainingLabels);
-        loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-test.csv", testData, testLabels);
+    // Inform the user that the dataset is loading
+    //ui->statusLabel->setText("Loading dataset...");
 
-    } catch (const std::runtime_error& e) {
-        // Display the error message to the user
-        ui->statusLabel->setText(QString("Error: ") + e.what());
-        return; // Exit the constructor or handle the error as appropriate
-    }
+    // Use QTimer to defer the loading of data
+    QTimer::singleShot(0, this, &MainWindow::loadData);
 
     neuralNetwork = new NeuralNetwork(784, 128, 47, 0.1);
 }
+
+void MainWindow::loadData() {
+    try {
+        //ui->statusLabel->setText("Please wait the dataset is being loaded");
+        loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-train.csv", trainingData, trainingLabels);
+        loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-test.csv", testData, testLabels);
+        // Inform the user that the dataset has been loaded
+        ui->statusLabel->setText("Dataset loaded successfully!");
+    } catch (const std::runtime_error& e) {
+        // Display the error message to the user
+        ui->statusLabel->setText(QString("Error: ") + e.what());
+        return; // Exit the method or handle the error as appropriate
+    }
+}
+
 
 void MainWindow::loadEMNISTData(const std::string& filename, std::vector<std::vector<double>>& data, std::vector<int>& labels) {
     std::ifstream file(filename);
@@ -112,23 +125,27 @@ void MainWindow::trainModel() {
 
 
 void MainWindow::testModel() {
+    // Inform the user that the Algorithm is testing
+    ui->statusLabel->setText("testing the detection Algorithm against the testing Dataset");
     int correctPredictions = 0;
     test_suite(*neuralNetwork, testData, testLabels, correctPredictions);
 
     double accuracy = static_cast<double>(correctPredictions) / testLabels.size() * 100.0;
-
-    QString resultText = QString("Accuracy: %1% (%2 out of %3 correct)").arg(accuracy).arg(correctPredictions).arg(testLabels.size());
+    QString resultText = QString("TESTING IS DONE. \
+        Accuracy: %1% (%2 out of %3 correct)").arg(accuracy).arg(correctPredictions).arg(testLabels.size());
     ui->statusLabel->setText(resultText);
 }
 
 void MainWindow::saveModel() {
     // TODO: Save the model to a file
+    ui->statusLabel->setText("Model is being saved.....");
     neuralNetwork->save("path_to_save_model");
     ui->statusLabel->setText("Model saved successfully!");
 }
 
 void MainWindow::loadModel() {
     // TODO: Load the model from a file
+    ui->statusLabel->setText("Model is being loaded.....");
     neuralNetwork->load("path_to_load_model");
     ui->statusLabel->setText("Model loaded successfully!");
 }
