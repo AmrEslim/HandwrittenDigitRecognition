@@ -20,6 +20,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->testButton, &QPushButton::clicked, this, &MainWindow::testModel);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveModel);
     connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadModel);
+
     worker = nullptr;
     isTraining = false;
     isTestingPeriodically = false;
@@ -161,6 +162,10 @@ void MainWindow::trainModel() {
         // Connect the training epoch number signal to the progressBar
         connect(worker, &TrainModelWorker::epochUpdate, this, &MainWindow::updateTrainingProgress);
 
+        ///////
+        connect(worker, &TrainModelWorker::trainingErrorReported, this, &MainWindow::updateErrorGraph);
+
+
         // Connect the training progress update signal to update the status label
         connect(worker, &TrainModelWorker::trainingProgressUpdate, this, [this](const QString& message) {
             ui->statusLabel->setText(message);
@@ -234,6 +239,20 @@ void MainWindow::on_periodicTest_clicked() {
         ui->periodicTest->setText("Start Periodic Test");
     }
 }
+void MainWindow::updateErrorGraph(double error) {
+    // Assuming you have a QCustomPlot member called errorPlot
+    static QVector<double> xData, yData;
+    xData.append(static_cast<double>(xData.size())); // assuming X-axis is just the index/epoch
+    yData.append(error);
+
+    ui->errorPlot->addGraph();
+    ui->errorPlot->graph(0)->setData(xData, yData);
+
+    // Optionally set axes labels, ranges, etc.
+
+    ui->errorPlot->replot();
+}
+
 
 
 

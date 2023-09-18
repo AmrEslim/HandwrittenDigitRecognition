@@ -115,6 +115,8 @@ void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<
         QString updateMessage = QString("Training Epoch %1 completed. Current error: %2").arg(epoch).arg(error);
         emit trainingProgress(updateMessage);
         emit epochUpdates(epoch);
+        emit errorReported(error);
+
     }
 }
 

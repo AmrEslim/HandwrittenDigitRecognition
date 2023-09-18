@@ -7,6 +7,8 @@ TrainModelWorker::TrainModelWorker(NeuralNetwork* nn, const std::vector<std::vec
     // Connect the signal from NeuralNetwork to the new signal in TrainModelWorker
     connect(neuralNetwork, &NeuralNetwork::trainingProgress, this, &TrainModelWorker::trainingProgressUpdate);
     connect(neuralNetwork, &NeuralNetwork::epochUpdates, this, &TrainModelWorker::epochUpdate);
+    connect(neuralNetwork, &NeuralNetwork::errorReported, this, &TrainModelWorker::trainingErrorReported);
+
 }
 
 void TrainModelWorker::run() {

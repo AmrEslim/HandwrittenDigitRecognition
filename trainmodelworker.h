@@ -13,6 +13,7 @@ signals:
     void trainingProgressUpdate(const QString& message);
     void trainingCompleted(QString message);
     void epochUpdate(int epoch);
+    void trainingErrorReported(double error);
 
 protected:
     void run() override;

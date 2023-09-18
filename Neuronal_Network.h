@@ -24,6 +24,7 @@ public:
 signals:
     void trainingProgress(QString message);
     void epochUpdates(int epoch);
+    void errorReported(double error);
 
 private:
     int inputSize;

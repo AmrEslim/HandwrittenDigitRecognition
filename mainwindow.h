@@ -45,5 +45,6 @@ private slots:
     void onTrainingCompleted(QString message);
     void stopTraining();
     void updateTrainingProgress(int epoch);
+    void updateErrorGraph(double error);
 };
 #endif // MAINWINDOW_H
