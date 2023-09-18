@@ -26,6 +26,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         Matrix.h Neuronal_Network.h
         Matrix.cpp Neuronal_Network.cpp
         emnist-balanced-test.csv emnist-balanced-train.csv
+        trainmodelworker.h trainmodelworker.cpp
 
     )
 # Define target properties for Android with Qt 6 as:

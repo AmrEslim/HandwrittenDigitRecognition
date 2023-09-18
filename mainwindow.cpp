@@ -18,6 +18,8 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->testButton, &QPushButton::clicked, this, &MainWindow::testModel);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveModel);
     connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadModel);
+    worker = nullptr;
+    isTraining = false;
     // Inform the user that the dataset is loading
     //ui->statusLabel->setText("Loading dataset...");
 
@@ -106,22 +108,37 @@ void MainWindow::test_suite(NeuralNetwork& nn, std::vector<std::vector<double>>&
 }
 
 void MainWindow::trainModel() {
-    // Parameters for training
-    int epochs = 5;  // Number of times to iterate over the entire dataset
-    int batchSize = 32;  // Number of data points per batch
-    std::vector<double> errors;  // To collect errors for each batch
+    if (!isTraining) {
+        worker = new TrainModelWorker(neuralNetwork, trainingData, trainingLabels);
+        connect(worker, &TrainModelWorker::trainingCompleted, this, &MainWindow::onTrainingCompleted);
+        connect(worker, &TrainModelWorker::finished, worker, &QObject::deleteLater);
 
-    // Train the neural network
-    neuralNetwork->train(trainingData, trainingLabels, epochs, errors, batchSize);
-
-    // Update the UI to show training is complete or display the training error
-    if (errors.empty()) {
-        ui->statusLabel->setText("Training complete!");
+        worker->start();
+        ui->trainButton->setText("Stop Training");
+        isTraining = true;
     } else {
-        // Display the last error as an example
-        ui->statusLabel->setText(QString("Training complete. Last error: %1").arg(errors.back()));
+        stopTraining();
     }
 }
+
+void MainWindow::onTrainingCompleted(QString message) {
+    ui->statusLabel->setText(message);
+    ui->trainButton->setText("Start Training");
+    isTraining = false;
+}
+
+void MainWindow::stopTraining() {
+    if (worker) {
+        worker->terminate(); // forcefully stops the thread
+        worker->wait();      // waits for the thread to truly finish
+        delete worker;       // clean up
+        worker = nullptr;
+    }
+    ui->statusLabel->setText("Training stopped.");
+    ui->trainButton->setText("Start Training");
+    isTraining = false;
+}
+
 
 
 void MainWindow::testModel() {
