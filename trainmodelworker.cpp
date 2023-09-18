@@ -3,7 +3,10 @@
 
 
 TrainModelWorker::TrainModelWorker(NeuralNetwork* nn, const std::vector<std::vector<double>>& data, const std::vector<int>& labels)
-    : neuralNetwork(nn), trainingData(data), trainingLabels(labels) {} // Directly copy the data
+    : neuralNetwork(nn), trainingData(data), trainingLabels(labels) {
+    // Connect the signal from NeuralNetwork to the new signal in TrainModelWorker
+    connect(neuralNetwork, &NeuralNetwork::trainingProgress, this, &TrainModelWorker::trainingProgressUpdate);
+}
 
 void TrainModelWorker::run() {
     int epochs = 5; // Or any other desired number of epochs

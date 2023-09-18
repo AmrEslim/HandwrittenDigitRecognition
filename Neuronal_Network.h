@@ -4,8 +4,12 @@
 #include "Matrix.h"
 #include <vector>
 #include <string>
+#include <QThread>
 
-class NeuralNetwork {
+
+class NeuralNetwork : public QObject {
+    Q_OBJECT
+
 public:
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize, double learningRate);
     std::vector<double> predict(std::vector<double>& input);
@@ -16,6 +20,9 @@ public:
     void sigmoid(MyMatrix& matrix);
     void save(const std::string& filename) const;
     void load(const std::string& filename);
+
+signals:
+    void trainingProgress(QString message);
 
 private:
     int inputSize;

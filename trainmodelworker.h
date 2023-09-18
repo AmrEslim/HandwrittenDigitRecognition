@@ -9,8 +9,8 @@ class TrainModelWorker : public QThread {
 
 public:
     TrainModelWorker(NeuralNetwork* nn, const std::vector<std::vector<double>>& data, const std::vector<int>& labels);
-
 signals:
+    void trainingProgressUpdate(const QString& message);
     void trainingCompleted(QString message);
 
 protected:

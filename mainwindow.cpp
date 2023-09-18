@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Neuronal_Network.h"
+#include "trainmodelworker.h"
 #include <QFile>
 #include <QString>
 #include <fstream>
@@ -109,8 +110,19 @@ void MainWindow::test_suite(NeuralNetwork& nn, std::vector<std::vector<double>>&
 
 void MainWindow::trainModel() {
     if (!isTraining) {
+        ui->trainButton->setText("Starting Training process...");
         worker = new TrainModelWorker(neuralNetwork, trainingData, trainingLabels);
+
+        // Connect the training completed signal to handle completion
         connect(worker, &TrainModelWorker::trainingCompleted, this, &MainWindow::onTrainingCompleted);
+
+        // Connect the training progress update signal to update the status label
+        connect(worker, &TrainModelWorker::trainingProgressUpdate, this, [this](const QString& message) {
+            ui->statusLabel->setText(message);
+        });
+
+
+        // Ensure the worker is deleted once it finishes execution
         connect(worker, &TrainModelWorker::finished, worker, &QObject::deleteLater);
 
         worker->start();
@@ -121,6 +133,7 @@ void MainWindow::trainModel() {
     }
 }
 
+
 void MainWindow::onTrainingCompleted(QString message) {
     ui->statusLabel->setText(message);
     ui->trainButton->setText("Start Training");
@@ -129,7 +142,7 @@ void MainWindow::onTrainingCompleted(QString message) {
 
 void MainWindow::stopTraining() {
     if (worker) {
-        worker->terminate(); // forcefully stops the thread
+        worker->terminate(); // forcefully stops the thread (use with caution)
         worker->wait();      // waits for the thread to truly finish
         delete worker;       // clean up
         worker = nullptr;
@@ -138,6 +151,7 @@ void MainWindow::stopTraining() {
     ui->trainButton->setText("Start Training");
     isTraining = false;
 }
+
 
 
 

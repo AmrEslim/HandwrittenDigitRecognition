@@ -6,6 +6,7 @@
 #include <string>
 #include <numeric>
 #include <random>
+#include <QString>
 
 
 /// Static class method that calculates the sigmoid of the value n
@@ -109,7 +110,10 @@ void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<
         
         // Print error for this epoch
         error /= numInputs;
-        std::cout << "Epoch " << epoch << ", Total error: " << error << std::endl;
+        //std::cout << "Epoch " << epoch << ", Total error: " << error << std::endl;
+        // Emitting a progress update:
+        QString updateMessage = QString("Training Epoch %1 completed. Current error: %2").arg(epoch).arg(error);
+        emit trainingProgress(updateMessage);
     }
 }
 

@@ -76,7 +76,7 @@ color: rgb(0, 0, 0);</string>
      <item>
       <widget class="QPushButton" name="testButton">
        <property name="text">
-        <string>Predict</string>
+        <string>Test Dataset</string>
        </property>
       </widget>
      </item>
