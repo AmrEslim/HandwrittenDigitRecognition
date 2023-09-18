@@ -2,6 +2,7 @@
 #include "./ui_mainwindow.h"
 #include "Neuronal_Network.h"
 #include "trainmodelworker.h"
+#include "qcustomplot.h"
 #include <QFile>
 #include <QString>
 #include <fstream>

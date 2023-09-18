@@ -220,6 +220,16 @@ border-color: rgb(0, 0, 0);</string>
      <string/>
     </property>
    </widget>
+   <widget class="QCustomPlot" name="errorPlot" native="true">
+    <property name="geometry">
+     <rect>
+      <x>30</x>
+      <y>20</y>
+      <width>241</width>
+      <height>131</height>
+     </rect>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -233,6 +243,14 @@ border-color: rgb(0, 0, 0);</string>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
