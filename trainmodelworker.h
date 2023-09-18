@@ -12,6 +12,7 @@ public:
 signals:
     void trainingProgressUpdate(const QString& message);
     void trainingCompleted(QString message);
+    void epochUpdate(int epoch);
 
 protected:
     void run() override;

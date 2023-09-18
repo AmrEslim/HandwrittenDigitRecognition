@@ -6,10 +6,11 @@ TrainModelWorker::TrainModelWorker(NeuralNetwork* nn, const std::vector<std::vec
     : neuralNetwork(nn), trainingData(data), trainingLabels(labels) {
     // Connect the signal from NeuralNetwork to the new signal in TrainModelWorker
     connect(neuralNetwork, &NeuralNetwork::trainingProgress, this, &TrainModelWorker::trainingProgressUpdate);
+    connect(neuralNetwork, &NeuralNetwork::epochUpdates, this, &TrainModelWorker::epochUpdate);
 }
 
 void TrainModelWorker::run() {
-    int epochs = 5; // Or any other desired number of epochs
+    int epochs = 100; // Or any other desired number of epochs
     std::vector<double> errors; // To capture errors
     int batchSize = 32; // Or any other desired batch size
 

@@ -30,13 +30,20 @@ private:
     void test_suite(NeuralNetwork& nn, std::vector<std::vector<double>>& inputs, std::vector<int>& labels, int& results);
     TrainModelWorker* worker;
     bool isTraining;
+    bool isTestingPeriodically;
+    int testingIndex;
+    QTimer* testingTimer;
+    void performPeriodicTest();
+    QImage vectorToQImage(const std::vector<double>& image);
 
 private slots:
+    void on_periodicTest_clicked();
     void trainModel();
     void testModel();
     void saveModel();
     void loadModel();
     void onTrainingCompleted(QString message);
     void stopTraining();
+    void updateTrainingProgress(int epoch);
 };
 #endif // MAINWINDOW_H

@@ -8,7 +8,8 @@
 #include <sstream>
 #include <stdexcept>
 #include <QTimer>
-
+#include <QImage>
+#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -21,6 +22,11 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadModel);
     worker = nullptr;
     isTraining = false;
+    isTestingPeriodically = false;
+    testingIndex = 0;
+
+    testingTimer = new QTimer(this);
+    connect(testingTimer, &QTimer::timeout, this, &MainWindow::performPeriodicTest);
     // Inform the user that the dataset is loading
     //ui->statusLabel->setText("Loading dataset...");
 
@@ -107,7 +113,43 @@ void MainWindow::test_suite(NeuralNetwork& nn, std::vector<std::vector<double>>&
     }
     results = count;
 }
+void MainWindow::performPeriodicTest() {
+    if (testingIndex >= testData.size()) {
+        testingIndex = 0;
+    }
 
+    std::vector<double> image = testData[testingIndex];
+    int label = testLabels[testingIndex];
+    int networkGuessLabel = neuralNetwork->oneHotPredict(image);
+
+    // Convert the 'image' vector to QImage and set it to the drawingCanvas label.
+    QImage qImage = vectorToQImage(image);
+    ui->drawingCanvas->setPixmap(QPixmap::fromImage(qImage).scaled(ui->drawingCanvas->size(), Qt::KeepAspectRatio));
+
+    // Update the carLabel and prediction label
+    std::string actualChar = labelToChar(label);
+    std::string predictedChar = labelToChar(networkGuessLabel);
+
+    ui->carLabel->setText(QString::fromStdString(actualChar));
+    ui->prediction->setText(QString::fromStdString(predictedChar));
+
+    testingIndex++;
+}
+QImage MainWindow::vectorToQImage(const std::vector<double>& image) {
+    int width = 28; // As per EMNIST data
+    int height = 28; // As per EMNIST data
+
+    QImage qImage(width, height, QImage::Format_Grayscale8);
+
+    for(int y = 0; y < height; y++) {
+        for(int x = 0; x < width; x++) {
+            int value = static_cast<int>(image[y * width + x] * 255);
+            qImage.setPixel(x, y, qRgb(value, value, value));
+        }
+    }
+
+    return qImage;
+}
 void MainWindow::trainModel() {
     if (!isTraining) {
         ui->trainButton->setText("Starting Training process...");
@@ -115,6 +157,9 @@ void MainWindow::trainModel() {
 
         // Connect the training completed signal to handle completion
         connect(worker, &TrainModelWorker::trainingCompleted, this, &MainWindow::onTrainingCompleted);
+
+        // Connect the training epoch number signal to the progressBar
+        connect(worker, &TrainModelWorker::epochUpdate, this, &MainWindow::updateTrainingProgress);
 
         // Connect the training progress update signal to update the status label
         connect(worker, &TrainModelWorker::trainingProgressUpdate, this, [this](const QString& message) {
@@ -152,9 +197,6 @@ void MainWindow::stopTraining() {
     isTraining = false;
 }
 
-
-
-
 void MainWindow::testModel() {
     // Inform the user that the Algorithm is testing
     ui->statusLabel->setText("testing the detection Algorithm against the testing Dataset");
@@ -162,8 +204,7 @@ void MainWindow::testModel() {
     test_suite(*neuralNetwork, testData, testLabels, correctPredictions);
 
     double accuracy = static_cast<double>(correctPredictions) / testLabels.size() * 100.0;
-    QString resultText = QString("TESTING IS DONE. \
-        Accuracy: %1% (%2 out of %3 correct)").arg(accuracy).arg(correctPredictions).arg(testLabels.size());
+    QString resultText = QString("TESTING IS DONE. Accuracy: %1% (%2 out of %3 correct)").arg(accuracy).arg(correctPredictions).arg(testLabels.size());
     ui->statusLabel->setText(resultText);
 }
 
@@ -180,6 +221,21 @@ void MainWindow::loadModel() {
     neuralNetwork->load("path_to_load_model");
     ui->statusLabel->setText("Model loaded successfully!");
 }
+void MainWindow::updateTrainingProgress(int epoch) {
+    ui->trainingProgressBar->setValue(epoch);
+}
+void MainWindow::on_periodicTest_clicked() {
+    isTestingPeriodically = !isTestingPeriodically;
+    if (isTestingPeriodically) {
+        testingTimer->start(1000); // start testing every second
+        ui->periodicTest->setText("Stop Periodic Test");
+    } else {
+        testingTimer->stop();
+        ui->periodicTest->setText("Start Periodic Test");
+    }
+}
+
+
 
 
 MainWindow::~MainWindow()
