@@ -249,10 +249,17 @@ void MainWindow::updateErrorGraph(double error) {
     ui->errorPlot->addGraph();
     ui->errorPlot->graph(0)->setData(xData, yData);
 
-    // Optionally set axes labels, ranges, etc.
+    // Set the range for both axes
+    ui->errorPlot->xAxis->setRange(0, 100); // x-axis range from 0 to 100
+    ui->errorPlot->yAxis->setRange(0, 100); // y-axis range from 0 to 100
+
+    // Set the axes labels
+    ui->errorPlot->xAxis->setLabel("Epoch");
+    ui->errorPlot->yAxis->setLabel("Errors");
 
     ui->errorPlot->replot();
 }
+
 
 
 
