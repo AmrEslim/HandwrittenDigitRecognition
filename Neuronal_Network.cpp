@@ -7,6 +7,7 @@
 #include <numeric>
 #include <random>
 #include <QString>
+#include <omp.h>
 
 
 /// Static class method that calculates the sigmoid of the value n
@@ -82,7 +83,7 @@ void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<
         for (int b = 0; b < numBatches; ++b) {
             int start = b * batchSize;
             int end = std::min(start + batchSize, numInputs);
-
+            #pragma omp parallel for reduction(+:error) num_threads(numThreads)
             for (int i = start; i < end; ++i) {
                 int idx = indices[i]; // Using the shuffled index
 
