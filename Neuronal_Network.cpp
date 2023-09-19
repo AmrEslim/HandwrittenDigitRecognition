@@ -65,14 +65,13 @@ int NeuralNetwork::oneHotPredict(std::vector<double> &input) {
 /// @param labels a vector of ints that show which output is the correct answer. Should correspond 1-to-1 with the inputs
 /// @param epochs The number of times the neural network should loop over the inputs for training
 /// @param errors A reference to a vector of doubles. The neural network will push_back the current error of the neural network every 5000 datapoints
-void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<int>& labels, int epochs, std::vector<double>& errors, int batchSize = 32) {
+void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<int>& labels, int epochs, std::vector<double>& errors, int batchSize) {
     int numInputs = static_cast<int>(inputs.size());
-    //int numInputs = inputs.size();
     int numBatches = (numInputs + batchSize - 1) / batchSize;
 
     for (int epoch = 0; epoch < epochs; ++epoch) {
         double error = 0.0;
-        
+
         // 1. Shuffle dataset
         std::vector<int> indices(numInputs);
         std::iota(indices.begin(), indices.end(), 0);
@@ -86,39 +85,60 @@ void NeuralNetwork::train(std::vector<std::vector<double>>& inputs, std::vector<
 
             for (int i = start; i < end; ++i) {
                 int idx = indices[i]; // Using the shuffled index
-                
+
                 // Forward pass
                 MyMatrix inputMatrix(inputs[idx]);
                 MyMatrix hidden = weights1 * inputMatrix + biases1;
                 sigmoid(hidden);
                 MyMatrix output = weights2 * hidden + biases2;
                 sigmoid(output);
-                
+
                 // Setup target matrix
-                MyMatrix targetMatrix(outputSize, 1);
+                MyMatrix targetMatrix(output.rows(), 1); // Adjusted here
                 targetMatrix.setAll(0);
                 targetMatrix(labels[idx], 0) = 1;
-                
-                // ... [rest remains the same]
-            }
 
-            // Log progress
-            if (b % (numBatches/10) == 0) {  // log every 10% of progress
-                errors.push_back(error / ((b+1) * batchSize));  
+                // Calculate output error
+                MyMatrix outputErrorMatrix = output - targetMatrix;
+
+                // Compute squared error (could be replaced with cross-entropy loss)
+                double currentError = outputErrorMatrix.elementWiseProduct(outputErrorMatrix).sum();
+                error += currentError;
+
+                // Backpropagation
+                MyMatrix hiddenError = weights2.transpose() * outputErrorMatrix;
+                MyMatrix hiddenGradient = hidden.elementWiseProduct(MyMatrix::allOnes(hidden.rows(), hidden.columns()) - hidden).elementWiseProduct(hiddenError);  // Adjusted here
+
+                MyMatrix weights2Delta = outputErrorMatrix * hidden.transpose();
+                MyMatrix biases2Delta = outputErrorMatrix;
+
+                MyMatrix weights1Delta = hiddenGradient * inputMatrix.transpose();
+                MyMatrix biases1Delta = hiddenGradient;
+
+                // Update weights and biases
+                weights2 -= weights2Delta * learningRate;
+                biases2 -= biases2Delta * learningRate;
+                weights1 -= weights1Delta * learningRate;
+                biases1 -= biases1Delta * learningRate;
+
+                // Log progress
+                if (i % 5000 == 0 && i != 0) {
+                    errors.push_back(error / i);  // mean squared error for now
+                }
             }
         }
-        
+
         // Print error for this epoch
         error /= numInputs;
-        //std::cout << "Epoch " << epoch << ", Total error: " << error << std::endl;
         // Emitting a progress update:
         QString updateMessage = QString("Training Epoch %1 completed. Current error: %2").arg(epoch).arg(error);
         emit trainingProgress(updateMessage);
         emit epochUpdates(epoch);
         emit errorReported(error);
-
     }
 }
+
+
 
 
 

@@ -39,6 +39,7 @@ public:
     std::vector<double> getColumnAsVector(int colIndex) const;
     MyMatrix elementWiseProduct(const MyMatrix& other) const;
     void setAll(double value);
+    static MyMatrix allOnes(int rows, int cols);
 };
 
 #endif // MATRIX_H

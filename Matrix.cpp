@@ -39,6 +39,16 @@ MyMatrix::MyMatrix(const std::vector<double>& values, bool isColumn)
     }
 }
 
+MyMatrix MyMatrix::allOnes(int rows, int cols) {
+    MyMatrix result(rows, cols);
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            result(i, j) = 1.0;
+        }
+    }
+    return result;
+}
+
 /// Returns the number of rows the matrix has
 int MyMatrix::rows() const{
     return m_rows;

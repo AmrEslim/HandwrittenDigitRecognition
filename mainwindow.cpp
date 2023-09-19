@@ -161,6 +161,7 @@ QImage MainWindow::vectorToQImage(const std::vector<double>& image) {
 void MainWindow::trainModel() {
     if (!isTraining) {
         ui->trainButton->setText("Starting Training process...");
+        ui->statusLabel->setText("Starting Training process...");
         worker = new TrainModelWorker(neuralNetwork, trainingData, trainingLabels);
 
         // Connect the training completed signal to handle completion
@@ -250,7 +251,7 @@ void MainWindow::updateErrorGraph(double error) {
     // Assuming you have a QCustomPlot member called errorPlot
     static QVector<double> xData, yData;
     xData.append(static_cast<double>(xData.size())); // assuming X-axis is just the index/epoch
-    yData.append(error);
+    yData.append(error * 100);
 
     ui->errorPlot->addGraph();
     ui->errorPlot->graph(0)->setData(xData, yData);
