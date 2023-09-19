@@ -124,19 +124,25 @@ void MainWindow::performPeriodicTest() {
     int label = testLabels[testingIndex];
     int networkGuessLabel = neuralNetwork->oneHotPredict(image);
 
-    // Convert the 'image' vector to QImage and set it to the drawingCanvas label.
-    QImage qImage = vectorToQImage(image);
-    ui->drawingCanvas->setPixmap(QPixmap::fromImage(qImage).scaled(ui->drawingCanvas->size(), Qt::KeepAspectRatio));
-
     // Update the carLabel and prediction label
-    std::string actualChar = labelToChar(label);
-    std::string predictedChar = labelToChar(networkGuessLabel);
+    ui->carLabel->setText(QString::fromStdString(labelToChar(label)));
+    ui->prediction->setText(QString::fromStdString(labelToChar(networkGuessLabel)));
 
-    ui->carLabel->setText(QString::fromStdString(actualChar));
-    ui->prediction->setText(QString::fromStdString(predictedChar));
+    // Convert the 'image' vector to QImage
+    QImage qImage = vectorToQImage(image);
+
+    // Mirror and rotate the image
+    qImage = qImage.mirrored(true, false);  // Mirror horizontally
+    QTransform transform;
+    transform.rotate(-90);  // Rotate 90 degrees counterclockwise
+    qImage = qImage.transformed(transform);
+
+    // Set the transformed image to the drawingCanvas label
+    ui->drawingCanvas->setPixmap(QPixmap::fromImage(qImage).scaled(ui->drawingCanvas->size(), Qt::KeepAspectRatio));
 
     testingIndex++;
 }
+
 QImage MainWindow::vectorToQImage(const std::vector<double>& image) {
     int width = 28; // As per EMNIST data
     int height = 28; // As per EMNIST data
