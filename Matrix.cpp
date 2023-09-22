@@ -1,44 +1,34 @@
-
 #include "Matrix.h"
 #include <cstdlib>
 #include <ctime>
 #include <stdexcept>
-#include <forward_list>
 
-/// Defines an empty 0x0 Matrix. Should not be called.
+// Default constructor for an empty matrix
 MyMatrix::MyMatrix(): m_rows(0), m_cols(0){}
 
-/// Constructs a matrix with the specified number of columns and rows. Default value is 0.0 (doubles)
-/// @param rows The integer number of rows
-/// @param cols The integer number of coloums
+// Constructor to initialize a matrix with the given number of rows and columns
 MyMatrix::MyMatrix(int rows, int cols)
-        : m_rows(rows), m_cols(cols), m_data(rows * cols){
+    : m_rows(rows), m_cols(cols), m_data(rows * cols){}
 
-}
-
-/// Constructs a copy of the matrix
-/// @param other The other matrix to copy
+// Copy constructor to create a copy of an existing matrix
 MyMatrix::MyMatrix(const MyMatrix& other)
-        : m_rows(other.m_rows), m_cols(other.m_cols), m_data(other.m_data){
-}
+    : m_rows(other.m_rows), m_cols(other.m_cols), m_data(other.m_data){}
 
-/// Turns a vector into a 1 dimensional vector
-/// @param values The vector of doubles to turn into a matrix
-/// @param isColumn Boolean value, if true the values will be turned into a matrix with only one column. If false the matrix will be one row instead
+// Constructor to initialize a matrix from a given vector
 MyMatrix::MyMatrix(const std::vector<double>& values, bool isColumn)
 {
     if (isColumn) {
         m_rows = values.size();
         m_cols = 1;
         m_data = values;
-    }
-    else {
+    } else {
         m_rows = 1;
         m_cols = values.size();
         m_data = values;
     }
 }
 
+// Static function to create a matrix with all elements set to one
 MyMatrix MyMatrix::allOnes(int rows, int cols) {
     MyMatrix result(rows, cols);
     for (int i = 0; i < rows; ++i) {
@@ -49,24 +39,27 @@ MyMatrix MyMatrix::allOnes(int rows, int cols) {
     return result;
 }
 
-/// Returns the number of rows the matrix has
+// Function to get the number of rows in the matrix
 int MyMatrix::rows() const{
     return m_rows;
 }
 
-/// Returns the number of colums the matrix has
+// Function to get the number of columns in the matrix
 int MyMatrix::columns() const{
     return m_cols;
 }
 
+// Overloaded () operator to access matrix elements (read-only)
 double MyMatrix::operator()(int row, int col) const{
     return m_data[row * m_cols + col];
 }
 
+// Overloaded () operator to access matrix elements (read-write)
 double& MyMatrix::operator()(int row, int col){
     return m_data[row * m_cols + col];
 }
-/// sums of two matrices
+
+// Function to calculate the sum of all elements in the matrix
 double MyMatrix::sum() const{
     double total = 0.0;
     for (int i = 0; i < rows(); ++i) {
@@ -77,8 +70,7 @@ double MyMatrix::sum() const{
     return total;
 }
 
-
-/// Adds this matrix with the other matrix
+// Overloaded + operator for matrix addition
 MyMatrix MyMatrix::operator+(const MyMatrix& other) const{
     MyMatrix result(m_rows, m_cols);
     for (int i = 0; i < m_rows * m_cols; ++i) {
@@ -87,6 +79,7 @@ MyMatrix MyMatrix::operator+(const MyMatrix& other) const{
     return result;
 }
 
+// Function to convert the matrix to a 2D vector
 std::vector<std::vector<double>> MyMatrix::toList() const {
     std::vector<std::vector<double>> list(rows());
     for (int i = 0; i < rows(); ++i) {
@@ -97,12 +90,11 @@ std::vector<std::vector<double>> MyMatrix::toList() const {
     return list;
 }
 
+// Function to initialize the matrix from a 2D vector
 void MyMatrix::fromList(const std::vector<std::vector<double>>& list) {
     if (rows() != list.size() || columns() != list[0].size()) {
-        // Throw an error or handle the size mismatch in some other way
         throw std::runtime_error("Size mismatch between matrix and provided list");
     }
-
     for (int i = 0; i < list.size(); ++i) {
         for (int j = 0; j < list[i].size(); ++j) {
             (*this)(i, j) = list[i][j];
@@ -110,10 +102,7 @@ void MyMatrix::fromList(const std::vector<std::vector<double>>& list) {
     }
 }
 
-
-
-
-/// Substracts the other matrix from the values of this matrix
+// Overloaded - operator for matrix subtraction
 MyMatrix MyMatrix::operator-(const MyMatrix& other) const{
     MyMatrix result(m_rows, m_cols);
     for (int i = 0; i < m_rows * m_cols; ++i) {
@@ -122,7 +111,7 @@ MyMatrix MyMatrix::operator-(const MyMatrix& other) const{
     return result;
 }
 
-/// Matrix multiplication of the matrices (use elementWiseProduct for normal multiplication)
+// Overloaded * operator for matrix multiplication
 MyMatrix MyMatrix::operator*(const MyMatrix& other) const{
     MyMatrix result(m_rows, other.m_cols);
     for (int i = 0; i < m_rows; ++i) {
@@ -137,7 +126,7 @@ MyMatrix MyMatrix::operator*(const MyMatrix& other) const{
     return result;
 }
 
-/// Multiplies each value of the matrix with the scalar
+// Overloaded * operator for scalar multiplication
 MyMatrix MyMatrix::operator*(double scalar) const {
     MyMatrix result(m_rows, m_cols);
     for (int i = 0; i < m_rows; i++) {
@@ -148,30 +137,26 @@ MyMatrix MyMatrix::operator*(double scalar) const {
     return result;
 }
 
-/// In place addition of the matrix
+// Overloaded += operator for in-place matrix addition
 void MyMatrix::operator+=(const MyMatrix& other){
     for (int i = 0; i < m_rows * m_cols; ++i) {
         m_data[i] += other.m_data[i];
     }
 }
 
-/// In place subtraction of the matrix
+// Overloaded -= operator for in-place matrix subtraction
 void MyMatrix::operator-=(const MyMatrix& other){
     for (int i = 0; i < m_rows * m_cols; ++i) {
         m_data[i] -= other.m_data[i];
     }
 }
 
-
-/// In place matrix multiplication of the other matrix (use elementWiseProduct for normal multiplication)
+// Overloaded *= operator for in-place matrix multiplication
 void MyMatrix::operator*=(const MyMatrix& other){
     *this = *this * other;
 }
 
-
-/// Randomizes the values of the matrix with a double
-/// @param minVal The minimum value possible
-/// @param maxVal The maximum value possible
+// Function to randomize the matrix with values between minVal and maxVal
 void MyMatrix::randomize(double minVal, double maxVal){
     std::srand(std::time(nullptr));
     double range = maxVal - minVal;
@@ -180,8 +165,7 @@ void MyMatrix::randomize(double minVal, double maxVal){
     }
 }
 
-/// Returns a copy of the matrix that is transposed (mirrored diagonally)
-/// The resulting matrix has as many rows as the initial matrix has columns and vice versa
+// Function to get the transpose of the matrix
 MyMatrix MyMatrix::transpose() const {
     MyMatrix result(m_cols, m_rows);
     for (int i = 0; i < m_rows; i++) {
@@ -192,41 +176,33 @@ MyMatrix MyMatrix::transpose() const {
     return result;
 }
 
-/// Returns a single column of the matrix as a vector of doubles
-/// @param colIndex The index of the column to get as a vector
+// Function to get a single column of the matrix as a vector
 std::vector<double> MyMatrix::getColumnAsVector(int colIndex) const{
     if (colIndex < 0 || colIndex >= m_cols) {
         throw std::out_of_range("Invalid column index");
     }
-
     std::vector<double> column(m_rows);
     for (int i = 0; i < m_rows; ++i) {
         column[i] = m_data[i * m_cols + colIndex];
     }
-
     return column;
 }
 
-/// Multiplies each element of the matrix with the corresponding element in the other matrix
-/// @param other The other matrix to multiply with. THe matrices must be the same size
+// Function to get the element-wise product of two matrices
 MyMatrix MyMatrix::elementWiseProduct(const MyMatrix& other) const{
     if (m_rows != other.m_rows || m_cols != other.m_cols) {
         throw std::invalid_argument("Matrices must have the same dimensions");
     }
-
     MyMatrix result(m_rows, m_cols);
     for (int i = 0; i < m_rows; ++i) {
         for (int j = 0; j < m_cols; ++j) {
             result(i, j) = (*this)(i, j) * other(i, j);
         }
     }
-
     return result;
 }
 
-
-/// Sets all the elements of the matrix to this value
-/// @param value The value to be set
+// Function to set all elements of the matrix to a given value
 void MyMatrix::setAll(double value) {
     for (int i = 0; i < m_rows; i++) {
         for (int j = 0; j < m_cols; j++) {
@@ -235,6 +211,7 @@ void MyMatrix::setAll(double value) {
     }
 }
 
+// Function to resize the matrix to new dimensions
 void MyMatrix::resize(int newRows, int newCols) {
     m_rows = newRows;
     m_cols = newCols;

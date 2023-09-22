@@ -1,46 +1,52 @@
+// Qt includes
+#include <QFile>
+#include <QString>
+#include <QTimer>
+#include <QImage>
+#include <QPixmap>
+
+// Standard library includes
+#include <fstream>
+#include <sstream>
+#include <stdexcept>
+
+// Project specific includes
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 #include "Neuronal_Network.h"
 #include "trainmodelworker.h"
 #include "qcustomplot.h"
-#include <QFile>
-#include <QString>
-#include <fstream>
-#include <sstream>
-#include <stdexcept>
-#include <QTimer>
-#include <QImage>
-#include <QPixmap>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    // Connect UI buttons to their respective slots
     connect(ui->trainButton, &QPushButton::clicked, this, &MainWindow::trainModel);
     connect(ui->testButton, &QPushButton::clicked, this, &MainWindow::testModel);
     connect(ui->saveButton, &QPushButton::clicked, this, &MainWindow::saveModel);
     connect(ui->loadButton, &QPushButton::clicked, this, &MainWindow::loadModel);
 
+    // Initialize worker thread and flags
     worker = nullptr;
     isTraining = false;
     isTestingPeriodically = false;
     testingIndex = 0;
 
+    // Set up testing timer and connect its timeout signal
     testingTimer = new QTimer(this);
     connect(testingTimer, &QTimer::timeout, this, &MainWindow::performPeriodicTest);
-    // Inform the user that the dataset is loading
-    //ui->statusLabel->setText("Loading dataset...");
 
-    // Use QTimer to defer the loading of data
+    // Load the dataset and initialize the neural network
     QTimer::singleShot(0, this, &MainWindow::loadData);
-
     neuralNetwork = new NeuralNetwork(784, 128, 47, 0.1);
 }
 
 void MainWindow::loadData() {
     try {
-        //ui->statusLabel->setText("Please wait the dataset is being loaded");
+        // Load training and test data, and inform the user
         loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-train.csv", trainingData, trainingLabels);
         loadEMNISTData("C:/Users/Amr/Desktop/MPT/HandwrittenDigitRecognition/emnist-balanced-test.csv", testData, testLabels);
         // Inform the user that the dataset has been loaded
@@ -48,7 +54,7 @@ void MainWindow::loadData() {
     } catch (const std::runtime_error& e) {
         // Display the error message to the user
         ui->statusLabel->setText(QString("Error: ") + e.what());
-        return; // Exit the method or handle the error as appropriate
+        return;
     }
 }
 
@@ -144,8 +150,8 @@ void MainWindow::performPeriodicTest() {
 }
 
 QImage MainWindow::vectorToQImage(const std::vector<double>& image) {
-    int width = 28; // As per EMNIST data
-    int height = 28; // As per EMNIST data
+    int width = 28;
+    int height = 28;
 
     QImage qImage(width, height, QImage::Format_Grayscale8);
 
@@ -200,7 +206,7 @@ void MainWindow::onTrainingCompleted(QString message) {
 
 void MainWindow::stopTraining() {
     if (worker) {
-        worker->terminate(); // forcefully stops the thread (use with caution)
+        worker->terminate(); // forcefully stops the thread
         worker->wait();      // waits for the thread to truly finish
         delete worker;       // clean up
         worker = nullptr;
@@ -222,14 +228,14 @@ void MainWindow::testModel() {
 }
 
 void MainWindow::saveModel() {
-    // TODO: Save the model to a file
+    // Save the model to a file
     ui->statusLabel->setText("Model is being saved.....");
     neuralNetwork->save("path_to_save_model");
     ui->statusLabel->setText("Model saved successfully!");
 }
 
 void MainWindow::loadModel() {
-    // TODO: Load the model from a file
+    // Load the model from a file
     ui->statusLabel->setText("Model is being loaded.....");
     neuralNetwork->load("path_to_load_model");
     ui->statusLabel->setText("Model loaded successfully!");
@@ -248,17 +254,16 @@ void MainWindow::on_periodicTest_clicked() {
     }
 }
 void MainWindow::updateErrorGraph(double error) {
-    // Assuming you have a QCustomPlot member called errorPlot
     static QVector<double> xData, yData;
-    xData.append(static_cast<double>(xData.size())); // assuming X-axis is just the index/epoch
+    xData.append(static_cast<double>(xData.size()+1));
     yData.append(error * 100);
 
     ui->errorPlot->addGraph();
     ui->errorPlot->graph(0)->setData(xData, yData);
 
     // Set the range for both axes
-    ui->errorPlot->xAxis->setRange(0, 100); // x-axis range from 0 to 100
-    ui->errorPlot->yAxis->setRange(0, 100); // y-axis range from 0 to 100
+    ui->errorPlot->xAxis->setRange(0, 100);
+    ui->errorPlot->yAxis->setRange(0, 100);
 
     // Set the axes labels
     ui->errorPlot->xAxis->setLabel("Epoch");
