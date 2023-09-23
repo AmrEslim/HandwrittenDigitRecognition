@@ -10,6 +10,38 @@
 #include <omp.h>
 
 
+// Implementation of Getter Methods
+inline MyMatrix NeuralNetwork::getWeights1() const {
+    return weights1;
+}
+
+inline MyMatrix NeuralNetwork::getBiases1() const {
+    return biases1;
+}
+
+inline MyMatrix NeuralNetwork::getWeights2() const {
+    return weights2;
+}
+
+inline MyMatrix NeuralNetwork::getBiases2() const {
+    return biases2;
+}
+
+inline int NeuralNetwork::getInputSize() const {
+    return inputSize;
+}
+
+inline int NeuralNetwork::getHiddenSize() const {
+    return hiddenSize;
+}
+
+inline int NeuralNetwork::getOutputSize() const {
+    return outputSize;
+}
+
+inline double NeuralNetwork::getLearningRate() const {
+    return learningRate;
+}
 // Static class method that calculates the sigmoid of the value n
 double NeuralNetwork::calcSigmoid(double n) {
     return 1.0 / (1.0 + std::exp(-n));

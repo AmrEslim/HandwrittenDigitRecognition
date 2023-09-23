@@ -11,6 +11,16 @@ class NeuralNetwork : public QObject {
     Q_OBJECT
 
 public:
+    // Getter methods to access internal state
+    MyMatrix getWeights1() const;
+    MyMatrix getBiases1() const;
+    MyMatrix getWeights2() const;
+    MyMatrix getBiases2() const;
+    int getInputSize() const;
+    int getHiddenSize() const;
+    int getOutputSize() const;
+    double getLearningRate() const;
+
     NeuralNetwork(int inputSize, int hiddenSize, int outputSize, double learningRate);
     std::vector<double> predict(std::vector<double>& input);
     int oneHotPredict(std::vector<double>& input);
